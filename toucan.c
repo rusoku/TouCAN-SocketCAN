@@ -63,7 +63,7 @@ struct toucan_usb_device {
 	u8 ep_bulk_out;
 	const struct can_bittiming_const *bittiming_const;
 	void (*usb_rx_pkt_decode)(struct urb *urb);
-	void (*usb_tx_pkt_encode)(struct sk_buff *skb, void *msg, u32 ctrlmode);
+	void (*usb_tx_pkt_encode)(struct sk_buff *skb, void *msg);
 	__u32 base_clock;
 };
 
@@ -504,7 +504,7 @@ static void toucan_rx_err_msg(struct toucan_usb_priv *priv,
 	priv->bec.rxerr = status->rxerr;
 
 	stats->rx_packets++;
-	stats->rx_bytes += cf->len;
+	stats->rx_bytes += cf->can_dlc;
 	netif_rx(skb);
 }
 
@@ -523,20 +523,18 @@ static void toucan_rx_can_msg(struct toucan_usb_priv *priv,
 			return;
 
 		cf->can_id = be32_to_cpu(msg->id);
-		cf->len = can_get_cc_len(msg->dlc);
-		cf->len8_dlc = can_get_len8_dlc(priv->can.ctrlmode,
-						cf->len, msg->dlc);
+		cf->can_dlc = get_can_dlc(msg->dlc);
 
 		if (msg->flags & TOUCAN_MSG_FLG_EXTID)
 			cf->can_id |= CAN_EFF_FLAG;
 
-		if (msg->flags & TOUCAN_MSG_FLG_RTR) {
+		if (msg->flags & TOUCAN_MSG_FLG_RTR)
 			cf->can_id |= CAN_RTR_FLAG;
-		} else {
-			memcpy(cf->data, msg->data, cf->len);
-			stats->rx_bytes += cf->len;
-		}
+		else
+			memcpy(cf->data, msg->data, cf->can_dlc);
+
 		stats->rx_packets++;
+		stats->rx_bytes += cf->can_dlc;
 		netif_rx(skb);
 	}
 }
@@ -561,7 +559,7 @@ static void toucan_rx_usb_pkt(struct urb *urb)
 	}
 }
 
-static void toucan_tx_usb_pkt(struct sk_buff *skb, void *buf, u32 ctrlmode)
+static void toucan_tx_usb_pkt(struct sk_buff *skb, void *buf)
 {
 	struct can_frame *cf = (struct can_frame *)skb->data;
 	struct toucan_usb_msg *msg = (struct toucan_usb_msg *)buf;
@@ -575,8 +573,8 @@ static void toucan_tx_usb_pkt(struct sk_buff *skb, void *buf, u32 ctrlmode)
 		msg->flags |= TOUCAN_MSG_FLG_EXTID;
 
 	msg->id = cpu_to_be32(cf->can_id & CAN_ERR_MASK);
-	msg->dlc = can_get_cc_dlc(ctrlmode, cf->len, cf->len8_dlc);
-	memcpy(msg->data, cf->data, cf->len);
+	msg->dlc = cf->can_dlc;
+	memcpy(msg->data, cf->data, cf->can_dlc);
 }
 
 static void toucan_usb_read_bulk_callback(struct urb *urb)
@@ -648,7 +646,7 @@ static netdev_tx_t toucan_usb_start_xmit(struct sk_buff *skb,
 		goto nomembuf;
 	}
 
-	priv->adapter->usb_tx_pkt_encode(skb, buf, priv->can.ctrlmode);
+	priv->adapter->usb_tx_pkt_encode(skb, buf);
 
 	for (i = 0; i < MAX_TX_URBS; i++) {
 		if (priv->tx_contexts[i].echo_index == MAX_TX_URBS) {
@@ -666,7 +664,7 @@ static netdev_tx_t toucan_usb_start_xmit(struct sk_buff *skb,
 		goto nofreecontext;
 
 	cf = (struct can_frame *)skb->data;
-	context->dlc = cf->len;
+	context->dlc = cf->can_dlc;
 
 	usb_fill_bulk_urb(urb, priv->udev, priv->ep_bulk_out, buf,
 			  size, toucan_usb_write_bulk_callback, context);
@@ -909,8 +907,7 @@ static int toucan_usb_probe(struct usb_interface *intf,
 	priv->can.do_get_berr_counter = toucan_usb_get_berr_counter;
 	priv->can.ctrlmode_supported = CAN_CTRLMODE_LOOPBACK |
 				       CAN_CTRLMODE_LISTENONLY |
-				       CAN_CTRLMODE_ONE_SHOT |
-				       CAN_CTRLMODE_CC_LEN8_DLC;
+				       CAN_CTRLMODE_ONE_SHOT;
 
 	priv->adapter = adapter;
 	priv->ep_ctrl_in = usb_rcvctrlpipe(priv->udev, 0);

@@ -4,6 +4,10 @@ CAN driver for Toucan adapter
 Building kernel module
 ----
 
+Clone source code:
+
+git clone --branch v1.0 https://github.com/rusoku/TouCAN-SocketCAN
+
 Make sure you have kernel source and C toolchain packages installed.
 To compile run:
 

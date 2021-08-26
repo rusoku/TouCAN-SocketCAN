@@ -1,4 +1,4 @@
-CAN driver for Toucan adapter
+SocketCAN driver for Toucan adapter
 ====
 
 Building kernel module

@@ -1,4 +1,4 @@
-SocketCAN driver for Toucan adapter for kernel version up to 5.12.x
+SocketCAN driver for Toucan adapter
 ====
 
 Building kernel module

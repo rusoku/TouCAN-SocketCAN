@@ -50,7 +50,9 @@ after booting.
 
 Set up interface
 ----
-    ip link set can0 up type can bitrate 125000
+For example the nmea2000 network use 250 kbps bitrate:
+
+    ip link set can0 up type can bitrate 250000
 
 
 Shut down interface

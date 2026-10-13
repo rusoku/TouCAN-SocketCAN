@@ -76,6 +76,10 @@ Add:
     ATTRS{idVendor}=="16d0", ATTRS{idProduct}=="0eac", \
     NAME="can$env{ID_SERIAL_SHORT}”
 
+Reload udev management tool:
+
+    sudo udevadm control --reload-rules
+
 Check names:
 
     parallels@ubuntu-linux-2404:~/Work/Toucan-socketcan$ ip -br link

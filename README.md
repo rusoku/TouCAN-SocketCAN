@@ -62,4 +62,25 @@ Shut down interface
     rmmod toucan
 
 
+How to create the desired interface names:
+----
+Interface = “can" + TouCAN adapter serial number
+
+Create rules:
+
+    sudo nano /etc/udev/rules.d/85-toucan.rules
+
+Add:
+
+    ACTION=="add", SUBSYSTEM=="net", KERNEL=="can*", \
+    ATTRS{idVendor}=="16d0", ATTRS{idProduct}=="0eac", \
+    NAME="can$env{ID_SERIAL_SHORT}”
+
+Check names:
+
+    parallels@ubuntu-linux-2404:~/Work/Toucan-socketcan$ ip -br link
+    lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP> 
+    enp0s5           UP             xx:xx:xx:xx:xx:xx <BROADCAST,MULTICAST,UP,LOWER_UP> 
+    can00007000      DOWN           <NOARP,ECHO> 
+    can00005800      DOWN           <NOARP,ECHO> 
 

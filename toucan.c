@@ -634,7 +634,7 @@ static netdev_tx_t toucan_usb_start_xmit(struct sk_buff *skb,
 	u8 *buf;
 	size_t size = sizeof(struct toucan_usb_msg);
 
-	if (can_dropped_invalid_skb(netdev, skb))
+	if (can_dev_dropped_skb(netdev, skb))
 		return NETDEV_TX_OK;
 
 	urb = usb_alloc_urb(0, GFP_ATOMIC);

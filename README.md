@@ -12,10 +12,6 @@ If you use with Raspberry Pi install Linux Kernel Headers:
 
     sudo apt install raspberrypi-kernel-headers
     
-Check your Linux kernel version:
-
-    uname -r	
-
 Download TouCAN SocketCAN driver source code from github.
  
     git clone https://github.com/rusoku/TouCAN-SocketCAN
@@ -23,7 +19,7 @@ Download TouCAN SocketCAN driver source code from github.
 Make sure you have kernel source and C toolchain packages installed.
 To compile run:
 
-    sudo make
+    make
 
 To install module to system run:
 

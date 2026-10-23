@@ -1,13 +1,13 @@
-// SPDX-License-Identifier: GPL-2.0-only
-/*
- * CAN driver for Rusoku Technologies TouCAN adapter
+/* SPDX-License-Identifier: GPL-2.0 */
+/* CAN driver for Rusoku Technologies TouCAN adapters
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published
- * by the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * 2019-2026 Rusoku technologijos UAB <info@rusoku.com>
+ * 
+ * This program is free software;
+ * you can redistribute it and or modify it *under the terms of the GNU General Public License
+ * as published *by the Free Software Foundation;
+ * version 2 of the License.**This program is distributed in the hope that it will
+ * be useful, * but *WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
@@ -15,17 +15,17 @@
  * with this program.
  *
  */
-
 #include <linux/module.h>
 #include <linux/netdevice.h>
 #include <linux/usb.h>
 #include <linux/can.h>
 #include <linux/can/dev.h>
+#include "toucan_compat.h"
 
 /* driver constants */
-#define MAX_RX_URBS			20
-#define MAX_TX_URBS			20
-#define RX_BUFFER_SIZE			64
+#define MAX_RX_URBS 20
+#define MAX_TX_URBS 20
+#define RX_BUFFER_SIZE 64
 
 struct toucan_usb_tx_urb_context {
 	struct toucan_usb_priv *priv;
@@ -68,9 +68,9 @@ struct toucan_usb_device {
 	__u32 base_clock;
 };
 
-#define TOUCAN_MSG_FLG_EXTID			0x01
-#define TOUCAN_MSG_FLG_RTR			0x02
-#define TOUCAN_MSG_FLG_ERR_FLAG			0x04
+#define TOUCAN_MSG_FLG_EXTID 0x01
+#define TOUCAN_MSG_FLG_RTR 0x02
+#define TOUCAN_MSG_FLG_ERR_FLAG 0x04
 
 struct __packed toucan_usb_msg {
 	u8 flags;
@@ -81,17 +81,17 @@ struct __packed toucan_usb_msg {
 };
 
 /* Status message flags */
-#define TOUCAN_STATE_MSG_OK			0x00  /* Normal condition. */
-#define TOUCAN_STATE_MSG_OVERRUN		0x01  /* Overrun occurred when sending */
-#define TOUCAN_STATE_MSG_BUSLIGHT		0x02  /* Error counter has reached 96 */
-#define TOUCAN_STATE_MSG_BUSHEAVY		0x03  /* Error count. has reached 128 */
-#define TOUCAN_STATE_MSG_BUSOFF		0x04  /* Device is in BUSOFF */
-#define TOUCAN_STATE_MSG_STUFF			0x20  /* Stuff Error */
-#define TOUCAN_STATE_MSG_FORM			0x21  /* Form Error */
-#define TOUCAN_STATE_MSG_ACK			0x23  /* Ack Error */
-#define TOUCAN_STATE_MSG_BIT0			0x24  /* Bit1 Error */
-#define TOUCAN_STATE_MSG_BIT1			0x25  /* Bit0 Error */
-#define TOUCAN_STATE_MSG_CRC			0x27  /* CRC Error */
+#define TOUCAN_STATE_MSG_OK 0x00 /* Normal condition. */
+#define TOUCAN_STATE_MSG_OVERRUN 0x01 /* Overrun occurred when sending */
+#define TOUCAN_STATE_MSG_BUSLIGHT 0x02 /* Error counter has reached 96 */
+#define TOUCAN_STATE_MSG_BUSHEAVY 0x03 /* Error count. has reached 128 */
+#define TOUCAN_STATE_MSG_BUSOFF 0x04 /* Device is in BUSOFF */
+#define TOUCAN_STATE_MSG_STUFF 0x20 /* Stuff Error */
+#define TOUCAN_STATE_MSG_FORM 0x21 /* Form Error */
+#define TOUCAN_STATE_MSG_ACK 0x23 /* Ack Error */
+#define TOUCAN_STATE_MSG_BIT0 0x24 /* Bit1 Error */
+#define TOUCAN_STATE_MSG_BIT1 0x25 /* Bit0 Error */
+#define TOUCAN_STATE_MSG_CRC 0x27 /* CRC Error */
 
 struct __packed toucan_status_msg {
 	u8 state;
@@ -99,10 +99,10 @@ struct __packed toucan_status_msg {
 	u8 txerr;
 };
 
-#define TOUCAN_INI_FLG_SILENT			0x01
-#define TOUCAN_INI_FLG_LOOPBACK			0x02
-#define TOUCAN_INI_FLG_DISABLE_AUTO_RESTRANS	0x04
-#define TOUCAN_INI_FLG_STATUS_FRAME		0x100
+#define TOUCAN_INI_FLG_SILENT 0x01
+#define TOUCAN_INI_FLG_LOOPBACK 0x02
+#define TOUCAN_INI_FLG_DISABLE_AUTO_RESTRANS 0x04
+#define TOUCAN_INI_FLG_STATUS_FRAME 0x100
 
 struct __packed toucan_init_msg {
 	u8 tseg1;
@@ -112,7 +112,7 @@ struct __packed toucan_init_msg {
 	__be32 flags;
 };
 
-#define TOUCAN_LASTERR_OK	0x0
+#define TOUCAN_LASTERR_OK 0x0
 
 enum toucan_usb_cmd {
 	TOUCAN_CAN_INTERFACE_INIT = 0x01,
@@ -128,12 +128,12 @@ enum toucan_usb_cmd {
 	TOUCAN_GET_LAST_ERROR_CODE = 0x20,
 };
 
-#define USB_RUSOKU_VENDOR_ID			0x16d0
-#define USB_RUSOKU_TOUCAN_PRODUCT_ID		0x0eac
+#define USB_RUSOKU_VENDOR_ID 0x16d0
+#define USB_RUSOKU_TOUCAN_PRODUCT_ID 0x0eac
 
 static const struct usb_device_id toucan_usb_table[] = {
 	{ USB_DEVICE(USB_RUSOKU_VENDOR_ID, USB_RUSOKU_TOUCAN_PRODUCT_ID) },
-	{ }				/* Terminating entry */
+	{} /* Terminating entry */
 };
 
 MODULE_DEVICE_TABLE(usb, toucan_usb_table);
@@ -158,7 +158,8 @@ static int __toucan_usb_cmd(struct toucan_usb_priv *priv, int direction, u8 cmd,
 		return -EINVAL;
 	}
 
-	ret = usb_control_msg(priv->udev, pipe, cmd, flags, 0, 0, msg, len, 1000);
+	ret = usb_control_msg(priv->udev, pipe, cmd, flags, 0, 0, msg, len,
+			      1000);
 
 	if (ret < 0) {
 		netdev_err(priv->netdev, "sending command message failed\n");
@@ -199,12 +200,14 @@ static int toucan_usb_cmd(struct toucan_usb_priv *priv, int direction, u8 cmd,
 	if (ret < 0)
 		goto cleanup;
 
-	ret = __toucan_usb_cmd(priv, USB_DIR_IN, TOUCAN_GET_LAST_ERROR_CODE, 1, buff_err);
+	ret = __toucan_usb_cmd(priv, USB_DIR_IN, TOUCAN_GET_LAST_ERROR_CODE, 1,
+			       buff_err);
 	if (ret < 0)
 		goto cleanup;
 
 	if (*((u8 *)buff_err) != TOUCAN_LASTERR_OK) {
-		netdev_err(priv->netdev, "command 0x%x produced an error\n", cmd);
+		netdev_err(priv->netdev, "command 0x%x produced an error\n",
+			   cmd);
 		ret = -EINVAL;
 		goto cleanup;
 	}
@@ -240,7 +243,8 @@ static int toucan_usb_get_hw_version(struct toucan_usb_priv *priv, u32 *res)
 	int ret = 0;
 	__be32 ver;
 
-	ret = toucan_usb_cmd(priv, USB_DIR_IN, TOUCAN_GET_HARDWARE_VERSION, 4, &ver);
+	ret = toucan_usb_cmd(priv, USB_DIR_IN, TOUCAN_GET_HARDWARE_VERSION, 4,
+			     &ver);
 	if (ret)
 		return ret;
 
@@ -254,7 +258,8 @@ static int toucan_usb_get_fw_version(struct toucan_usb_priv *priv, u32 *res)
 	int ret = 0;
 	__be32 ver;
 
-	ret = toucan_usb_cmd(priv, USB_DIR_IN, TOUCAN_GET_FIRMWARE_VERSION, 4, &ver);
+	ret = toucan_usb_cmd(priv, USB_DIR_IN, TOUCAN_GET_FIRMWARE_VERSION, 4,
+			     &ver);
 	if (ret)
 		return ret;
 
@@ -268,7 +273,8 @@ static int toucan_usb_cmd_init(struct toucan_usb_priv *priv)
 	struct can_bittiming *bt = &priv->can.bittiming;
 	struct toucan_init_msg msg;
 	u32 ctrlmode = priv->can.ctrlmode;
-	u32 flags = TOUCAN_INI_FLG_STATUS_FRAME; // enable error message reception
+	u32 flags =
+		TOUCAN_INI_FLG_STATUS_FRAME; // enable error message reception
 
 	memset(&msg, 0, sizeof(msg));
 
@@ -292,17 +298,20 @@ static int toucan_usb_cmd_init(struct toucan_usb_priv *priv)
 
 static int toucan_usb_cmd_deinit(struct toucan_usb_priv *priv)
 {
-	return toucan_usb_cmd(priv, USB_DIR_OUT, TOUCAN_CAN_INTERFACE_DEINIT, 0, NULL);
+	return toucan_usb_cmd(priv, USB_DIR_OUT, TOUCAN_CAN_INTERFACE_DEINIT, 0,
+			      NULL);
 }
 
 static int toucan_usb_cmd_start(struct toucan_usb_priv *priv)
 {
-	return toucan_usb_cmd(priv, USB_DIR_OUT, TOUCAN_CAN_INTERFACE_START, 0, NULL);
+	return toucan_usb_cmd(priv, USB_DIR_OUT, TOUCAN_CAN_INTERFACE_START, 0,
+			      NULL);
 }
 
 static int toucan_usb_cmd_stop(struct toucan_usb_priv *priv)
 {
-	return toucan_usb_cmd(priv, USB_DIR_OUT, TOUCAN_CAN_INTERFACE_STOP, 0, NULL);
+	return toucan_usb_cmd(priv, USB_DIR_OUT, TOUCAN_CAN_INTERFACE_STOP, 0,
+			      NULL);
 }
 
 static int toucan_usb_set_mode(struct net_device *netdev, enum can_mode mode)
@@ -359,28 +368,25 @@ static void toucan_usb_write_bulk_callback(struct urb *urb)
 	usb_free_coherent(urb->dev, urb->transfer_buffer_length,
 			  urb->transfer_buffer, urb->transfer_dma);
 
-	if (!netif_device_present(netdev))
-		return;
-
 	switch (urb->status) {
 	case 0:
 		netdev->stats.tx_packets++;
-		netdev->stats.tx_bytes += context->dlc;
-		can_get_echo_skb(netdev, context->echo_index,NULL);
+		netdev->stats.tx_bytes +=
+			can_get_echo_skb(netdev, context->echo_index, NULL);
 		break;
 
 	case -ENOENT:
 	case -ECONNRESET:
 	case -EPROTO:
 	case -ESHUTDOWN:
-		can_free_echo_skb(netdev, context->echo_index,NULL);
+		can_free_echo_skb(netdev, context->echo_index, NULL);
 		break;
 
 	default:
 		if (net_ratelimit())
 			netdev_err(netdev, "Tx URB aborted (%d)\n",
 				   urb->status);
-		can_free_echo_skb(netdev, context->echo_index,NULL);
+		can_free_echo_skb(netdev, context->echo_index, NULL);
 		break;
 	}
 
@@ -388,7 +394,7 @@ static void toucan_usb_write_bulk_callback(struct urb *urb)
 	context->echo_index = MAX_TX_URBS;
 	atomic_dec(&priv->active_tx_urbs);
 
-	if (!urb->status)
+	if (!urb->status && netif_device_present(netdev))
 		netif_wake_queue(netdev);
 }
 
@@ -468,20 +474,20 @@ static void toucan_rx_err_msg(struct toucan_usb_priv *priv,
 	case TOUCAN_STATE_MSG_BUSLIGHT:
 		priv->can.state = CAN_STATE_ERROR_WARNING;
 		cf->data[1] = (status->txerr > status->rxerr) ?
-			CAN_ERR_CRTL_TX_WARNING :
-			CAN_ERR_CRTL_RX_WARNING;
+				      CAN_ERR_CRTL_TX_WARNING :
+				      CAN_ERR_CRTL_RX_WARNING;
 		priv->can.can_stats.error_warning++;
 		break;
 	case TOUCAN_STATE_MSG_BUSHEAVY:
 		priv->can.state = CAN_STATE_ERROR_PASSIVE;
 		cf->data[1] = (status->txerr > status->rxerr) ?
-			CAN_ERR_CRTL_TX_PASSIVE :
-			CAN_ERR_CRTL_RX_PASSIVE;
+				      CAN_ERR_CRTL_TX_PASSIVE :
+				      CAN_ERR_CRTL_RX_PASSIVE;
 		priv->can.can_stats.error_passive++;
 		break;
 	default:
-		netdev_warn(priv->netdev,
-			    "Unknown status/error message (%d)\n", status->state);
+		netdev_warn(priv->netdev, "Unknown status/error message (%d)\n",
+			    status->state);
 		break;
 	}
 
@@ -595,18 +601,19 @@ static void toucan_usb_read_bulk_callback(struct urb *urb)
 
 	default:
 		if (net_ratelimit())
-			netdev_err(netdev, "Rx URB aborted (%d)\n", urb->status);
+			netdev_err(netdev, "Rx URB aborted (%d)\n",
+				   urb->status);
 		goto resubmit_urb;
 	}
 
 	priv->adapter->usb_rx_pkt_decode(urb);
 
 resubmit_urb:
-	usb_fill_bulk_urb(urb, priv->udev, priv->ep_bulk_in,
-			  urb->transfer_buffer, RX_BUFFER_SIZE,
-			  toucan_usb_read_bulk_callback, priv);
-
+	/* A completed URB is no longer anchored. Anchor every resubmit. */
+	usb_anchor_urb(urb, &priv->rx_submitted);
 	retval = usb_submit_urb(urb, GFP_ATOMIC);
+	if (retval)
+		usb_unanchor_urb(urb);
 
 	if (retval == -ENODEV)
 		netif_device_detach(netdev);
@@ -661,12 +668,12 @@ static netdev_tx_t toucan_usb_start_xmit(struct sk_buff *skb,
 	cf = (struct can_frame *)skb->data;
 	context->dlc = cf->can_dlc;
 
-	usb_fill_bulk_urb(urb, priv->udev, priv->ep_bulk_out, buf,
-			  size, toucan_usb_write_bulk_callback, context);
+	usb_fill_bulk_urb(urb, priv->udev, priv->ep_bulk_out, buf, size,
+			  toucan_usb_write_bulk_callback, context);
 	urb->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
 	usb_anchor_urb(urb, &priv->tx_submitted);
 
-	can_put_echo_skb(skb, netdev, context->echo_index,0);
+	can_put_echo_skb(skb, netdev, context->echo_index, 0);
 
 	atomic_inc(&priv->active_tx_urbs);
 
@@ -689,17 +696,17 @@ nofreecontext:
 	usb_free_urb(urb);
 
 	netdev_warn(netdev, "couldn't find free context");
+	/* skb still belongs to the network stack on NETDEV_TX_BUSY. */
 
 	return NETDEV_TX_BUSY;
-
 failed:
-	can_free_echo_skb(netdev, context->echo_index,NULL);
+	can_free_echo_skb(netdev, context->echo_index, NULL);
 
 	usb_unanchor_urb(urb);
 	usb_free_coherent(priv->udev, size, buf, urb->transfer_dma);
 
+	context->echo_index = MAX_TX_URBS;
 	atomic_dec(&priv->active_tx_urbs);
-
 	if (err == -ENODEV)
 		netif_device_detach(netdev);
 	else
@@ -731,8 +738,7 @@ static int toucan_usb_alloc_rx_urbs(struct toucan_usb_priv *priv)
 			break;
 		}
 
-		buf = usb_alloc_coherent(priv->udev, RX_BUFFER_SIZE, GFP_KERNEL,
-					 &urb->transfer_dma);
+		buf = kmalloc(RX_BUFFER_SIZE, GFP_KERNEL);
 		if (!buf) {
 			usb_free_urb(urb);
 			err = -ENOMEM;
@@ -742,14 +748,12 @@ static int toucan_usb_alloc_rx_urbs(struct toucan_usb_priv *priv)
 		usb_fill_bulk_urb(urb, priv->udev, priv->ep_bulk_in, buf,
 				  RX_BUFFER_SIZE, toucan_usb_read_bulk_callback,
 				  priv);
-		urb->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
+		urb->transfer_flags |= URB_FREE_BUFFER;
 		usb_anchor_urb(urb, &priv->rx_submitted);
 
 		err = usb_submit_urb(urb, GFP_KERNEL);
 		if (err) {
 			usb_unanchor_urb(urb);
-			usb_free_coherent(priv->udev, RX_BUFFER_SIZE, buf,
-					  urb->transfer_dma);
 			usb_free_urb(urb);
 			break;
 		}
@@ -799,6 +803,7 @@ static int toucan_usb_open(struct net_device *netdev)
 	return 0;
 
 cleanup_candev:
+	toucan_usb_unlink_all_urbs(priv);
 	close_candev(netdev);
 	return err;
 }
@@ -900,10 +905,9 @@ static int toucan_usb_probe(struct usb_interface *intf,
 	priv->can.bittiming_const = adapter->bittiming_const;
 	priv->can.do_set_mode = toucan_usb_set_mode;
 	priv->can.do_get_berr_counter = toucan_usb_get_berr_counter;
-	priv->can.ctrlmode_supported = CAN_CTRLMODE_LOOPBACK |
-				       CAN_CTRLMODE_LISTENONLY |
-				       CAN_CTRLMODE_ONE_SHOT |
-				       CAN_CTRLMODE_CC_LEN8_DLC;
+	priv->can.ctrlmode_supported =
+		CAN_CTRLMODE_LOOPBACK | CAN_CTRLMODE_LISTENONLY |
+		CAN_CTRLMODE_ONE_SHOT | CAN_CTRLMODE_CC_LEN8_DLC;
 
 	priv->adapter = adapter;
 	priv->ep_ctrl_in = usb_rcvctrlpipe(priv->udev, 0);
@@ -975,13 +979,13 @@ static void toucan_usb_disconnect(struct usb_interface *intf)
 }
 
 static struct usb_driver toucan_usb_driver = {
-	.name =		"toucan",
-	.probe =	toucan_usb_probe,
-	.disconnect =	toucan_usb_disconnect,
-	.id_table =	toucan_usb_table,
+	.name = "toucan",
+	.probe = toucan_usb_probe,
+	.disconnect = toucan_usb_disconnect,
+	.id_table = toucan_usb_table,
 };
 
 module_usb_driver(toucan_usb_driver);
 
-MODULE_DESCRIPTION("CAN driver for Rusoku Technologies TouCAN adapters");
+MODULE_DESCRIPTION("CAN driver for Rusoku technologijos UAB TouCAN adapters");
 MODULE_LICENSE("GPL v2");

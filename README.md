@@ -35,10 +35,15 @@ To install module to system run:
 
     sudo make install
 
+or
+
+    sudo install -D -m 644 ./toucan.ko \
+        /lib/modules/$(uname -r)/updates/toucan.ko
+
 
 Create a list of module dependencies.
   
-    sudo depmod
+    sudo depmod -a
 
 Reboot your Raspberry Pi. Double check if TouCAN driver module is loaded
 after booting.
@@ -52,13 +57,13 @@ Set up interface
 ----
 For example the nmea2000 network use 250 kbps bitrate:
 
-    ip link set can0 up type can bitrate 250000
+    sudo ip link set can0 up type can bitrate 250000
 
 
 Shut down interface
 ----
 
-    ip link set can0 down
+    sudo ip link set can0 down
     rmmod toucan
 
 

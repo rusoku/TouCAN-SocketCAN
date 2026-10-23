@@ -2,12 +2,16 @@ obj-m := toucan.o
 
 kernel_ver := $(shell uname -r)
 
+#KDIR ?= $(HOME)/work/WSL2-Linux-Kernel
+KDIR ?= /lib/modules/$(kernel_ver)/build
+
 all:
-	make -C /lib/modules/$(kernel_ver)/build M=$(shell pwd) modules
+#	$(MAKE) -j$(JOBS) -C $(KDIR) M=$(CURDIR) C=2 W=1 CHECK=sparse KCFLAGS="-Werror" WERROR=1 modules
+	$(MAKE) -j$(JOBS) -C $(KDIR) M=$(CURDIR) C=2 WERROR=1 modules
 
 install:
-	make -C /lib/modules/$(kernel_ver)/build M=$(shell pwd) modules_install
+	$(MAKE) -j$(JOBS) -C $(KDIR) M=$(CURDIR) modules_install
 
 clean:
-	make -C /lib/modules/$(kernel_ver)/build M=$(shell pwd) clean
+	$(MAKE) -j$(JOBS) -C $(KDIR) M=$(CURDIR) clean
 

@@ -17,12 +17,6 @@ Check your Linux kernel version:
     uname -r	
 
 Download TouCAN SocketCAN driver source code from github.
-
-For kernel version up to 5.12
-
-    git clone --branch v1.0 https://github.com/rusoku/TouCAN-SocketCAN
-
-For kernel version from v.5.12
  
     git clone https://github.com/rusoku/TouCAN-SocketCAN
 
